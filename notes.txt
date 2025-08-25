@@ -1,0 +1,38 @@
+THIS IS THE EARLIEST FORM OF THE VIEW IN THE API APP, IT SHOWS THE BEGINNING OF LEARNING DJANGO.
+
+
+from django.http import JsonResponse;
+import json;
+from products.models import Product;
+from django.forms.models import model_to_dict;
+
+def api_home(request, *args, **kwargs):
+    # print(request.GET)
+    # print(request.POST)
+    # body = request.body
+    # data = {}
+    # try:
+    #     data = json.loads(body) # """ --> this takes in a JSON data and turns it into a python dictionary """
+    # except:
+    #     pass;
+    # print(data)
+    # data['params'] = dict(request.GET)
+    # data['headers'] = dict(request.headers);
+    # data['content_type'] = request.content_type;
+    # print(data)
+    # return JsonResponse({"message": "Hi there this is a django program."}); #--> this sends back a customs response.
+    
+    model_data = Product.objects.all().order_by('?').first()
+    data = {};
+    
+    # if model_data:
+    #     data['id'] = model_data.id
+    #     data['title'] = model_data.title
+    #     data['price'] = model_data.price
+    #     data['content'] = model_data.content
+        
+        # what we did above is serialization and we can serialize this data in a shorter way by using the model_to_dict import. with model_to_dict, we can specify the fields the user wants to return from the model.
+        
+    data = model_to_dict(model_data, fields=['id', 'title', 'price'])
+        
+    return JsonResponse(data) #--> this sends back the data gotten from the response.
