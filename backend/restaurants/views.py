@@ -42,7 +42,7 @@ class RestaurantPagination(PageNumberPagination):
     max_page_size = 100
 
 class RestaurantMixin(mixins.ListModelMixin, mixins.RetrieveModelMixin, generics.GenericAPIView):
-    queryset = Restaurant.objects.all()
+    queryset = Restaurant.objects.all().order_by("id")
     serializer_class = RestaurantSerializer;
     lookup_field = 'pk';
     pagination_class = RestaurantPagination

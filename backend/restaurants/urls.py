@@ -12,4 +12,4 @@ urlpatterns = [
     path('<int:pk>/restaurant_details/', views.RestaurantMixin.as_view()),
     path('food_type/', views.FoodTypeView.as_view()),
     path('<int:pk>/food_type/', views.FoodTypeView.as_view()),
-]
+]  
