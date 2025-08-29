@@ -26,7 +26,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-zqr2=cu)3izcox%3y(-m*f8-h_ojg+^_hbefdwxns2be-lfuox'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv("DEBUG", "0") == "1"
+DEBUG = os.environ.get("DEBUG", "False") == "True"
 
 SECRET_KEY = os.getenv("SECRET_KEY", "change-me")
 
@@ -114,7 +114,11 @@ SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 # }
 
 DATABASES = {
-    'default': dj_database_url.config(default='postgres://localhost:5432/db')
+    "default": dj_database_url.config(
+        default=os.environ.get("DATABASE_URL"),
+        conn_max_age=600,
+        ssl_require=True
+    )
 }
 # DATABASES = {
 #     'default': {
