@@ -104,7 +104,7 @@ class ProductMixinView(
             content = 'This is a cool post request from a Mixin class';
         serializer.save(content = content)
 
-#method api view with get and post requests.
+#method api view with get and post requests.   
 @api_view(['GET', 'POST'])
 def product_alt_view(request, pk=None, *args, **kwargs):
     method = request.method

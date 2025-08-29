@@ -26,10 +26,19 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-zqr2=cu)3izcox%3y(-m*f8-h_ojg+^_hbefdwxns2be-lfuox'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv("DEBUG", "0") == "1"
 
-ALLOWED_HOSTS = []
+SECRET_KEY = os.getenv("SECRET_KEY", "change-me")
 
+ALLOWED_HOSTS = [
+    os.getenv("RENDER_EXTERNAL_HOSTNAME", ""),
+    ".onrender.com"
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    f"https://{os.getenv('RENDER_EXTERNAL_HOSTNAME','')}",
+    "https://*.onrender.com"
+]
 # Application definition
 
 INSTALLED_APPS = [
@@ -93,15 +102,19 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'aptech_python.wsgi.application'
 
-
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
+
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+    'default': dj_database_url.config(default='postgres://localhost:5432/db')
 }
 # DATABASES = {
 #     'default': {

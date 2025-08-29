@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Restaurant, FoodType, Dish
+from .models import Restaurant, FoodType, Dish, Menu
 
 
 class FoodTypeSerializer(serializers.ModelSerializer):
@@ -10,7 +10,7 @@ class FoodTypeSerializer(serializers.ModelSerializer):
 class RestaurantSerializer(serializers.ModelSerializer):
     class Meta:
         model = Restaurant
-        fields = ["id", "name", "description", "menu_card_image"]
+        fields = ["id", "name", "description"]
 
 
 class DishSerializer(serializers.ModelSerializer):
@@ -27,3 +27,24 @@ class DishSerializer(serializers.ModelSerializer):
             "food_type", "food_type_id", "is_available", "restaurant", "created_at"
         ]
         read_only_fields = ["id", "restaurant", "created_at"]
+        
+
+
+# class DishSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Dish
+#         fields = ["id", "name", "description", "price", "is_available"]
+
+
+class MenuSerializer(serializers.ModelSerializer):
+    dishes = DishSerializer(many=True, read_only=True)
+    dish_ids = serializers.PrimaryKeyRelatedField(
+        queryset=Dish.objects.all(),
+        many=True,
+        write_only=True,
+        source="dishes"
+    )
+
+    class Meta:
+        model = Menu
+        fields = ["id", "name", "description", "dishes", "dish_ids", "created_at"]
