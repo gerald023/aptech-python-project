@@ -32,8 +32,9 @@ SECRET_KEY = os.getenv("SECRET_KEY", "change-me")
 
 ALLOWED_HOSTS = [
     os.getenv("RENDER_EXTERNAL_HOSTNAME", ""),
-    ".onrender.com",
-    "aptech-python-project.onrender.com"
+    ".onrender.com", "127.0.0.1",
+    "localhost",
+    "aptech-python-project.onrender.com",
 ]
 
 CSRF_TRUSTED_ORIGINS = [
@@ -127,12 +128,18 @@ SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 # }
 
 
+# DATABASES = {
+#     'default': dj_database_url.config(
+#         default="postgres://avnadmin:AVNS_C8vCePhh4LfRh-NUIfY@python-db-aptech-python-db.i.aivencloud.com:14381/defaultdb?sslmode=require",
+#         conn_max_age=600,
+#         ssl_require=True
+#     )
+# }
 DATABASES = {
-    'default': dj_database_url.config(
-        default=os.environ.get("DATABASE_URL"),
-        conn_max_age=600,
-        ssl_require=True
-    )
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
 }
 
 # Password validation
