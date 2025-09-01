@@ -128,13 +128,7 @@ SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 # }
 
 
-# DATABASES = {
-#     'default': dj_database_url.config(
-#         default="postgres://avnadmin:AVNS_C8vCePhh4LfRh-NUIfY@python-db-aptech-python-db.i.aivencloud.com:14381/defaultdb?sslmode=require",
-#         conn_max_age=600,
-#         ssl_require=True
-#     )
-# }
+
 DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
