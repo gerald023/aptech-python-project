@@ -26,13 +26,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-zqr2=cu)3izcox%3y(-m*f8-h_ojg+^_hbefdwxns2be-lfuox'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get("DEBUG", "False") == "True"
+DEBUG = True if os.environ.get("DEBUG", "0") == "1" else False
 
 SECRET_KEY = os.getenv("SECRET_KEY", "change-me")
 
 ALLOWED_HOSTS = [
     os.getenv("RENDER_EXTERNAL_HOSTNAME", ""),
-    ".onrender.com"
+    ".onrender.com",
+    "aptech-python-project.onrender.com"
 ]
 
 CSRF_TRUSTED_ORIGINS = [
