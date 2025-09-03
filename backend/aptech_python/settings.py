@@ -110,13 +110,29 @@ SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 # Database settings
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.sqlite3",
-            "NAME": BASE_DIR / "db.sqlite3",
-        }
-}
+# DATABASES = {
+#         "default": {
+#             "ENGINE": "django.db.backends.sqlite3",
+#             "NAME": BASE_DIR / "db.sqlite3",
+#         }
+# }
+# DATABASES = {
+#     "default": {
+#         "ENGINE": "django.db.backends.postgresql",
+#         "NAME": "aptech_django_db",
+#         "USER": "django_db_ur7r_user",
+#         "PASSWORD": "qMtL6IbcmsA9nLjnbDOGqUmuPjhJ8CHw",
+#         "HOST": "dpg-d2lshtn5r7bs73e2nab0-a",
+#         "PORT": "5432",
+#     }
+# }
 
+DATABASES = {
+    'default': dj_database_url.config(default="postgresql://django_db_ur7r_user:qMtL6IbcmsA9nLjnbDOGqUmuPjhJ8CHw@dpg-d2lshtn5r7bs73e2nab0-a.oregon-postgres.render.com/django_db_ur7r",
+    conn_max_age=600,
+        ssl_require=True
+    )
+}
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
 
