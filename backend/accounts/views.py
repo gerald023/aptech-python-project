@@ -2,6 +2,7 @@ from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from dj_rest_auth.utils import jwt_encode
+from dj_rest_auth.views import LoginView
 from rest_framework.authtoken.models import Token
 
 from .serializers import (
@@ -55,3 +56,36 @@ class MeView(generics.RetrieveAPIView):
 
     def get_object(self):
         return self.request.user
+    
+class LoginView(LoginView):
+    def get_response(self):
+        response = super().get_response()
+        data = response.data;
+
+        # Get tokens
+        access_token = data.get("access")
+        refresh_token = data.get("refresh")
+        
+        
+        if access_token:
+            # Put access token in HttpOnly cookie
+            response.set_cookie(
+                key="access_token",
+                value=access_token,
+                httponly=True,
+                secure=True,
+                samesite="Lax",
+                max_age=30000
+            )
+            
+        if refresh_token:
+            # You can store refresh token in backend DB, or also in cookie if needed
+            response.set_cookie(
+                key="refresh_token",
+                value=refresh_token,
+                httponly=True,
+                secure=True,
+                samesite="Lax",
+                max_age=86400
+            )
+        return response;

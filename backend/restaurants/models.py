@@ -9,6 +9,7 @@ class Restaurant(models.Model):
     owner = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True, related_name="restaurant")
     name = models.CharField(max_length=255, null=False, blank=False, default="Unnamed Restaurant")
     description = models.TextField(blank=True)
+    restaurant_image = models.CharField(max_length=500, blank=True)
     # menu_card_image = models.ImageField(upload_to="restaurants/menu_cards/", blank=True, null=True)
     # # Add any branding fields you like
 
@@ -20,7 +21,15 @@ class FoodType(models.Model):
     Admin-defined types (Veg/Non-Veg etc.)
     """
     name = models.CharField(max_length=100, unique=True)
+    
+    
+    def clean(self):
+        allowed = {"Vegetarian", "Non-Vegetarian"}
+        if self.name not in allowed:
+            from django.core.exceptions import ValidationError
+            raise ValidationError(f"FoodType must be one of {allowed}")
 
+    
     def __str__(self):
         return self.name
 
@@ -57,10 +66,11 @@ class Dish(models.Model):
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True)
     price = models.DecimalField(max_digits=10, decimal_places=2)
-    image = models.ImageField(upload_to="dishes/", blank=True, null=True)
-    food_type = models.ForeignKey(FoodType, on_delete=models.SET_NULL, null=True, blank=True)
+    dish_image = models.CharField(max_length=500, blank=True)
+    food_type = models.ForeignKey(FoodType, on_delete=models.PROTECT, default=2,)
 
     categories = models.ManyToManyField(Category, related_name="dishes", blank=True)
+    menus = models.ManyToManyField("Menu", related_name="dishes", null= True, blank=True)
     is_available = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     
@@ -80,9 +90,8 @@ class Menu(models.Model):
         related_name="menus"
     )
     name = models.CharField(max_length=255, default="Main Menu")
+    menu_image = models.CharField(max_length=500, blank=True)
     description = models.TextField(blank=True)
-    dishes = models.ManyToManyField(Dish, related_name="menus", blank=True)
-
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
