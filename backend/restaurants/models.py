@@ -71,7 +71,7 @@ class Dish(models.Model):
     description = models.TextField(blank=True)
     price = models.DecimalField(max_digits=10, decimal_places=2)
     dish_image = models.CharField(max_length=500, blank=True)
-    food_type = models.ForeignKey(FoodType, on_delete=models.PROTECT, default=2,)
+    food_type = models.ForeignKey(FoodType, on_delete=models.PROTECT)
 
     categories = models.ManyToManyField(Category, related_name="dishes", blank=True)
     menus = models.ManyToManyField("Menu", related_name="dishes", blank=True)
