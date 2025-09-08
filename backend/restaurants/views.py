@@ -53,7 +53,7 @@ class MenuViewSet(viewsets.ModelViewSet):
         qs = Menu.objects.select_related("restaurant")
         # If the user is authenticated AND owns a restaurant → show only their menus
         if self.request.user.is_authenticated and hasattr(self.request.user, "restaurant"):
-            return qs.filter(restaurant=self.request.user.restaurant)
+            return qs.filter(restaurant=self.request.user.restaurant.id)
         return qs
 
     def get_permissions(self):

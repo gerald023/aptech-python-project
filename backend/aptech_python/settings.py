@@ -99,7 +99,9 @@ MIDDLEWARE = [
 CORS_ALLOWED_ORIGINS = [
     "https://online-food-ordering-system-if6f-bldj6oh8z.vercel.app",
     "http://localhost:5173",
-    "http://127.0.0.1:5173"
+    "http://127.0.0.1:5173",
+    "http://127.0.0.1:8000",
+    "http://localhost:8000",
 ]
 ROOT_URLCONF = 'aptech_python.urls'
 
