@@ -22,7 +22,7 @@ class FoodType(models.Model):
     """
     Admin-defined types (Veg/Non-Veg etc.)
     """
-    
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=100, unique=True)
     
     
@@ -45,7 +45,7 @@ class Category(models.Model):
         "Drink", "Soup", "Dessert", "Meal",
         "Steak", "Vegan", "Non-Vegan"
     ]
-
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=100)
     restaurant = models.ForeignKey(
         Restaurant,
