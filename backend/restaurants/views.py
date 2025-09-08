@@ -71,9 +71,9 @@ class MenuViewSet(viewsets.ModelViewSet):
     
     # --- Extra endpoint: view menus by restaurant ---
     @action(detail=False, methods=["get"], url_path="by-restaurant/(?P<restaurant_id>[^/.]+)")
-    def by_restaurant(self, request, restaurant_id=None):
+    def by_restaurant(self, request, restaurant=None):
         """Return menus belonging to a specific restaurant."""
-        qs = Menu.objects.filter(restaurant_id=restaurant_id).select_related("restaurant")
+        qs = Menu.objects.filter(restaurant=restaurant).select_related("restaurant")
         serializer = self.get_serializer(qs, many=True)
         return Response(serializer.data)
 
