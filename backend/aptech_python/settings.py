@@ -14,7 +14,9 @@ from pathlib import Path
 from datetime import timedelta
 import dj_database_url
 import os
-
+import cloudinary
+import cloudinary.uploader
+import cloudinary.api
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -35,11 +37,16 @@ ALLOWED_HOSTS = [
     ".onrender.com", "127.0.0.1",
     "localhost",
     "aptech-python-project.onrender.com",
+    "*"
 ]
 
 CSRF_TRUSTED_ORIGINS = [
     f"https://{os.getenv('RENDER_EXTERNAL_HOSTNAME','')}",
-    "https://*.onrender.com"
+    "https://*.onrender.com",
+    ".onrender.com", "127.0.0.1",
+    "localhost",
+    "aptech-python-project.onrender.com",
+    "*"
 ]
 # Application definition
 
@@ -213,7 +220,11 @@ REST_FRAMEWORK = {
         "rest_framework.filters.OrderingFilter",
     ],
 }
-
+cloudinary.config(
+    cloud_name="your_cloud_name",
+    api_key="your_api_key",
+    api_secret="your_api_secret"
+)
 
 REST_AUTH = {
     "USE_JWT": True,
