@@ -37,16 +37,17 @@ ALLOWED_HOSTS = [
     ".onrender.com", "127.0.0.1",
     "localhost",
     "aptech-python-project.onrender.com",
-    "*"
+    # "*"
 ]
 
 CSRF_TRUSTED_ORIGINS = [
     f"https://{os.getenv('RENDER_EXTERNAL_HOSTNAME','')}",
     "https://*.onrender.com",
-    ".onrender.com", "127.0.0.1",
-    "localhost",
-    "aptech-python-project.onrender.com",
-    "*"
+    'https://*.onrender.com',
+    'http://127.0.0.1',
+    'http://localhost',
+    'http://localhost:8000',
+    'https://aptech-python-project.onrender.com',
 ]
 # Application definition
 
@@ -59,6 +60,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework.authtoken',
+    
+    "corsheaders",
     # "rest_framework.simplejwt",
     
     "allauth",
@@ -82,6 +85,7 @@ SITE_ID = 1
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    "corsheaders.middleware.CorsMiddleware",
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -92,6 +96,9 @@ MIDDLEWARE = [
     'allauth.account.middleware.AccountMiddleware',
 ]
 
+CORS_ALLOWED_ORIGINS = [
+    "https://online-food-ordering-system-if6f-bldj6oh8z.vercel.app",
+]
 ROOT_URLCONF = 'aptech_python.urls'
 
 TEMPLATES = [
@@ -243,4 +250,26 @@ SWAGGER_SETTINGS = {
     "SECURITY_DEFINITIONS": {
         "Bearer": {"type": "apiKey", "name": "Authorization", "in": "header"}
     }
+}
+
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': 'INFO',
+        },
+        'django.request': {
+            'handlers': ['console'],
+            'level': 'DEBUG', # or INFO
+            'propagate': False,
+        },
+    },
 }

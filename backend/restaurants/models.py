@@ -1,11 +1,13 @@
 from django.db import models
 from django.conf import settings
+import uuid
 
 User = settings.AUTH_USER_MODEL
 
 
 # Create your models here.
 class Restaurant(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     owner = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True, related_name="restaurant")
     name = models.CharField(max_length=255, null=False, blank=False, default="Unnamed Restaurant")
     description = models.TextField(blank=True)
@@ -20,6 +22,7 @@ class FoodType(models.Model):
     """
     Admin-defined types (Veg/Non-Veg etc.)
     """
+    
     name = models.CharField(max_length=100, unique=True)
     
     
@@ -62,6 +65,7 @@ class Category(models.Model):
 
 
 class Dish(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     restaurant = models.ForeignKey(Restaurant, on_delete=models.CASCADE, related_name="dishes")
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True)
@@ -70,7 +74,7 @@ class Dish(models.Model):
     food_type = models.ForeignKey(FoodType, on_delete=models.PROTECT, default=2,)
 
     categories = models.ManyToManyField(Category, related_name="dishes", blank=True)
-    menus = models.ManyToManyField("Menu", related_name="dishes", null= True, blank=True)
+    menus = models.ManyToManyField("Menu", related_name="dishes", blank=True)
     is_available = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     
@@ -84,6 +88,7 @@ class Menu(models.Model):
     """
     A menu belongs to a restaurant, and can contain multiple dishes.
     """
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     restaurant = models.ForeignKey(
         Restaurant,
         on_delete=models.CASCADE,

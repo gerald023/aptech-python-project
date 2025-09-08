@@ -1,6 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
 from django.utils import timezone
+import uuid
+
 # Create your models here.
 
 class CustomUserManager(BaseUserManager):
@@ -30,7 +32,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         CUSTOMER = "customer", "Customer"
         RESTAURANT_OWNER = "restaurant_owner", "Restaurant Owner"
         ADMIN = "admin", "Admin"
-
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     email = models.EmailField(unique=True)
     role = models.CharField(
         max_length=20,
@@ -53,6 +55,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
 
 class Profile(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name="profile")
     display_name = models.CharField(max_length=100, blank=True)
     phone_number = models.CharField(max_length=30, blank=True)

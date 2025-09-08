@@ -1,6 +1,7 @@
 from django.db import models
 from django.conf import settings
 from restaurants.models import Restaurant, Dish
+import uuid
 
 User = settings.AUTH_USER_MODEL
 # Create your models here.
@@ -13,6 +14,7 @@ class Order(models.Model):
         PREPARING = "preparing", "Preparing"
         DELIVERED = "delivered", "Delivered"
         CANCELLED = "cancelled", "Cancelled"
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     customer = models.ForeignKey(User, on_delete=models.CASCADE, related_name="orders")
     restaurant = models.ForeignKey(Restaurant, on_delete=models.CASCADE, related_name="orders")
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.PENDING)
@@ -28,6 +30,7 @@ class Order(models.Model):
     
 
 class OrderItem(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="items")
     dish = models.ForeignKey(Dish, on_delete=models.PROTECT)
     quantity = models.PositiveIntegerField(default=1)
