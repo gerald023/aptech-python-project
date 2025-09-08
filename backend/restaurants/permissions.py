@@ -29,7 +29,7 @@ class IsOwnerOrReadOnly(BasePermission):
         if rest is None:
             # Global categories cannot be edited by non-admins
             return bool(request.user and request.user.is_superuser)
-        return bool(request.user and hasattr(request.user, "restaurant") and request.user.restaurant_id == rest.id)
+        return bool(request.user and hasattr(request.user, "restaurant") and request.user.restaurant.id == rest.id)
 
     def has_permission(self, request, view):
         # For create actions on restaurant-scoped resources: user must own a restaurant
