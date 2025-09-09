@@ -65,6 +65,7 @@ CSRF_TRUSTED_ORIGINS = [
     'http://localhost',
     'http://localhost:8000',
     'https://aptech-python-project.onrender.com',
+    "https://online-food-ordering-system-if6f.vercel.app",
 ]
 # Application definition
 
@@ -119,6 +120,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:5173",
     "http://127.0.0.1:8000",
     "http://localhost:8000",
+    "https://online-food-ordering-system-if6f.vercel.app"
 ]
 ROOT_URLCONF = 'aptech_python.urls'
 

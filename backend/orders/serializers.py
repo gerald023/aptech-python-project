@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Order, OrderItem
+from .models import Order, OrderItem, Cart, CartItem, Transaction
 from restaurants.models import Dish
 
 class OrderItemCreateSerializer(serializers.ModelSerializer):
@@ -50,3 +50,28 @@ class OrderCreateSerializer(serializers.Serializer):
             OrderItem.objects.create(order=order, dish=dish, quantity=qty, price=dish.price)
         order.recalc_total()
         return order
+    
+
+class CartItemSerializer(serializers.ModelSerializer):
+    dish_name = serializers.CharField(source="dish.name", read_only=True)
+    subtotal = serializers.DecimalField(max_digits=12, decimal_places=2, read_only=True)
+
+    class Meta:
+        model = CartItem
+        fields = ["id", "dish", "dish_name", "quantity", "price", "subtotal"]
+
+
+class CartSerializer(serializers.ModelSerializer):
+    items = CartItemSerializer(many=True, read_only=True)
+    total_amount = serializers.DecimalField(max_digits=12, decimal_places=2, read_only=True)
+
+    class Meta:
+        model = Cart
+        fields = ["id", "user", "items", "total_amount"]
+
+
+class TransactionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Transaction
+        fields = ["id", "order", "user", "amount", "reference", "status", "created_at"]
+        read_only_fields = ["id", "status", "created_at", "user"]
