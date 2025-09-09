@@ -1,6 +1,6 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import DishViewSet, FoodTypeViewSet, CategoryViewSet, MenuViewSet
+from .views import DishViewSet, FoodTypeViewSet, CategoryViewSet, MenuViewSet, RestaurantView
 from . import views
 
 router = DefaultRouter()
@@ -39,6 +39,8 @@ urlpatterns = [
     # path("dishes/<uuid:pk>/", dish_detail, name="dish-detail"),
     # path("dishes/<uuid:pk>/add-to-menu/", dish_add_to_menu, name="dish-add-to-menu"),
     # path("dishes/<uuid:pk>/remove-from-menu/", dish_remove_from_menu, name="dish-remove-from-menu"),
+    path("edit/", RestaurantView.as_view(), name="edit_restaurant_infos"),
+    path("edit/<uuid:pk>/", RestaurantView.as_view(), name="edit_restaurant-detail"),
     path('menus/', menu_list, name='menu-list'),
     path('menus/<uuid:pk>/', menu_detail, name='menu-detail'),
     path('menus/public/', public_menus, name='menu-public'),

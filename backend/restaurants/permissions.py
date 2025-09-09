@@ -12,10 +12,18 @@ class IsOwnerOfRestaurant(BasePermission):
     Assumes viewset sets queryset to the user's restaurant for writes.
     """
     def has_object_permission(self, request, view, obj):
-        # obj can be a Dish or Restaurant; both have .restaurant or are Restaurant
-        if hasattr(obj, "restaurant"):
-            return obj.restaurant.owner == request.user
-        return getattr(obj, "owner", None) == request.user
+        # SAFE methods: GET, HEAD, OPTIONS
+        if request.method in SAFE_METHODS:
+            return True
+        # Only allow if the requesting user is the owner
+        return bool(request.user and obj.owner == request.user)
+    
+    def has_permission(self, request, view):
+            # Allow all safe methods globally
+        if request.method in SAFE_METHODS:
+            return True
+        # For create, user must be authenticated
+        return bool(request.user and request.user.is_authenticated)
     
 
 class IsOwnerOrReadOnly(BasePermission):
@@ -26,6 +34,7 @@ class IsOwnerOrReadOnly(BasePermission):
         if request.method in SAFE_METHODS:
             return True
         rest = getattr(obj, "restaurant", None)
+        
         if rest is None:
             # Global categories cannot be edited by non-admins
             return bool(request.user and request.user.is_superuser)

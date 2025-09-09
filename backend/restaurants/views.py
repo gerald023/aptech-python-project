@@ -1,15 +1,23 @@
 from rest_framework import viewsets, mixins, generics, permissions, status
 from rest_framework.exceptions import PermissionDenied
 from accounts.permissions import IsRestaurantOwner
-from .permissions import IsSuperUser, IsOwnerOrReadOnly
+from .permissions import IsSuperUser, IsOwnerOrReadOnly, IsOwnerOfRestaurant
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.decorators import action
 from .filters import DishFilter
 from rest_framework.response import Response
 from rest_framework.pagination import PageNumberPagination
 from .models import Dish, Restaurant, FoodType, Category, Menu
+from django.shortcuts import get_object_or_404
 from .serializers import DishSerializer, RestaurantSerializer, FoodTypeSerializer, CategorySerializer, MenuSerializer
 
+
+class RestaurantView(generics.ListAPIView, generics.RetrieveUpdateDestroyAPIView):
+    queryset = Restaurant.objects.all()
+    serializer_class = RestaurantSerializer
+    permission_classes = [IsOwnerOfRestaurant, permissions.IsAuthenticatedOrReadOnly]
+    # lookup_field = "id"
+    
 
 class FoodTypeViewSet(viewsets.ModelViewSet):
     queryset = FoodType.objects.all().order_by("id")
@@ -19,7 +27,6 @@ class FoodTypeViewSet(viewsets.ModelViewSet):
         if self.action in ["list", "retrieve"]:
             return [AllowAny()]
         return [IsAuthenticated(), IsSuperUser()]
-
 
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.select_related("restaurant").all()
@@ -173,6 +180,27 @@ class DishViewSet(viewsets.ModelViewSet):
 
         dish.menus.remove(menu)
         return Response({"detail": "Dish removed from menu"}, status=status.HTTP_200_OK)
+    
+    @action(detail=True, methods=["post"], permission_classes=[permissions.IsAuthenticated, IsOwnerOrReadOnly])
+    def set_availability(self, request, pk=None):
+        """
+        POST /dishes/<id>/set_availability/
+        Body: { "is_available": true }
+        """
+        dish = self.get_object()
+        is_available = request.data.get("is_available")
+
+        if is_available is None:
+            return Response({"detail": "is_available is required (true/false)."}, status=status.HTTP_400_BAD_REQUEST)
+
+        dish.is_available = bool(is_available)
+        dish.save()
+
+        return Response({
+            "id": dish.id,
+            "name": dish.name,
+            "is_available": dish.is_available
+        }, status=status.HTTP_200_OK)
 
 
 class RestaurantPagination(PageNumberPagination):

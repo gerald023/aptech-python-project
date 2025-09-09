@@ -11,7 +11,7 @@ class Restaurant(models.Model):
     owner = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True, related_name="restaurant")
     name = models.CharField(max_length=255, null=False, blank=False, default="Unnamed Restaurant")
     description = models.TextField(blank=True)
-    restaurant_image = models.CharField(max_length=500, blank=True)
+    restaurant_image = models.URLField(max_length=500, blank=True)
     # menu_card_image = models.ImageField(upload_to="restaurants/menu_cards/", blank=True, null=True)
     # # Add any branding fields you like
 
@@ -70,7 +70,7 @@ class Dish(models.Model):
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True)
     price = models.DecimalField(max_digits=10, decimal_places=2)
-    dish_image = models.CharField(max_length=500, blank=True)
+    dish_image = models.URLField(max_length=500, blank=True)
     food_type = models.ForeignKey(FoodType, on_delete=models.PROTECT)
 
     categories = models.ManyToManyField(Category, related_name="dishes", blank=True)
@@ -95,7 +95,7 @@ class Menu(models.Model):
         related_name="menus"
     )
     name = models.CharField(max_length=255, default="Main Menu")
-    menu_image = models.CharField(max_length=500, blank=True)
+    menu_image = models.URLField(max_length=500, blank=True)
     description = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 

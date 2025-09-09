@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import Restaurant, FoodType, Dish, Menu, Category
+import cloudinary.uploader
 
 
 class FoodTypeSerializer(serializers.ModelSerializer):
@@ -15,9 +16,41 @@ class CategorySerializer(serializers.ModelSerializer):
         fields = ["id", "name", "restaurant"]
 
 class RestaurantSerializer(serializers.ModelSerializer):
+    restaurant_image_upload = serializers.ImageField(write_only=True, required=False)
     class Meta:
         model = Restaurant
-        fields = ["id", "name", "description"]
+        fields = ["id", "name", "description", 'restaurant_image', 'restaurant_image_upload', 'owner']
+        read_only_fields=['id', 'name', 'owner', 'description', 'restaurant_image']
+        
+    def create(self, validated_data):
+        restaurant_image_upload = validated_data.pop("restaurant_image_upload", None)
+        owner = validated_data.pop("owner")
+        restaurant = Restaurant.objects.create(user=owner, **validated_data)
+        
+        if restaurant_image_upload:
+            upload = cloudinary.uploader.upload(
+                restaurant_image_upload,
+                folder="aptech_python_onlineFood_delivery/restaurant_image"
+            )
+            restaurant.restaurant_image = upload.get('secure_url')
+            restaurant.save()
+        return restaurant;
+    
+    def update(self, instance, validated_data):
+        restaurant_image_upload = validated_data.pop("restaurant_image_upload", None)
+        
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        
+        if restaurant_image_upload:
+            upload = cloudinary.uploader.upload(
+                restaurant_image_upload,
+                folder="aptech_python_onlineFood_delivery/restaurant_image"
+            )
+            instance.restaurant_image = upload.get("secure_url")
+        instance.save()
+        return instance
+        
 
 
 class DishSerializer(serializers.ModelSerializer):
@@ -26,13 +59,14 @@ class DishSerializer(serializers.ModelSerializer):
     restaurant = RestaurantSerializer(read_only=True)
     food_type = FoodTypeSerializer(read_only=True)
     food_type = serializers.PrimaryKeyRelatedField(queryset=FoodType.objects.all())
+    dish_image_upload = serializers.ImageField(write_only=True, required=False)
 
     class Meta:
         model = Dish
         fields = [
             "id", "name", "description", "price", "dish_image",
             "food_type", "categories", "menus",
-            "restaurant", "is_available", "created_at",
+            "restaurant", "is_available", "created_at", "dish_image_upload"
         ]
         read_only_fields = ["id", "restaurant", "created_at"]
 
@@ -58,13 +92,24 @@ class DishSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         categories = validated_data.pop("categories", [])
         menus = validated_data.pop("menus", [])
+        dish_image_upload = validated_data.pop("dish_image_upload", None)
         user = self.context["request"].user
         restaurant = user.restaurant
+        
         validated_data["restaurant"] = restaurant
+        
+        dish = Dish.objects.create(**validated_data)
+        
+        if dish_image_upload:
+            upload = cloudinary.uploader.upload(
+                dish_image_upload,
+                folder="aptech_python_onlineFood_delivery/dishes"
+            )
+            dish.dish_image = upload.get('secure_url')
+            dish.save()
 
         self._validate_related_belongs_to_restaurant(restaurant, categories, menus)
 
-        dish = super().create(validated_data)
         if categories:
             dish.categories.set(categories)
         if menus:
@@ -75,42 +120,70 @@ class DishSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         categories = validated_data.pop("categories", None)
         menus = validated_data.pop("menus", None)
-        restaurant = instance.restaurant
-
+        # restaurant = instance.restaurant
+        dish_image_upload = validated_data.pop("dish_image_upload", None)
+        
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+            
+        if dish_image_upload:
+            upload = cloudinary.uploader.upload(
+                dish_image_upload,
+                folder = "aptech_python_onlineFood_delivery/dishes"
+            )
+            instance.dish_image = upload.get("secure_url")
+            
+            instance.save()
+            return instance
         if categories is not None or menus is not None:
-            self._validate_related_belongs_to_restaurant(restaurant, categories or [], menus or [])
+            self._validate_related_belongs_to_restaurant(instance.restaurant, categories or [], menus or [])
 
-        dish = super().update(instance, validated_data)
         if categories is not None:
-            dish.categories.set(categories)
+            instance.categories.set(categories)
         if menus is not None:
-            dish.menus.set(menus)
-        return dish
+            instance.menus.set(menus)
+        return instance
     
-# class DishSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Dish
-#         fields = ["id", "name", "description", "price", "is_available"]
 
 
 class MenuSerializer(serializers.ModelSerializer):
-    # dishes = DishSerializer(many=True, read_only=True)
-    # dish_ids = serializers.PrimaryKeyRelatedField(
-    #     queryset=Dish.objects.all(),
-    #     many=True,
-    #     write_only=True,
-    #     source="dishes"
-    # )
-
+    menu_image_upload = serializers.ImageField(write_only=True, required=False)
     class Meta:
         model = Menu
-        fields = ["id", "name", "description", "menu_image", "restaurant", "created_at"]
-        read_only_fields = ["created_at", "restaurant"]
+        fields = ["id", "name", "description", "menu_image", "restaurant", "created_at", "menu_image_upload"]
+        read_only_fields = ["created_at", "restaurant", "menu_image"]
         
     def create(self, validated_data):
+        menu_image_upload = validated_data.pop('menu_image_upload', None)
+        # user = validated_data.pop('user')
         user = self.context["request"].user
         validated_data["restaurant"] = user.restaurant
-        return super().create(validated_data)
+        menu = Menu.objects.create(user=user, **validated_data)
+        
+        if menu_image_upload:
+            upload = cloudinary.uploader.upload(
+                menu_image_upload,
+                folder="aptech_python_onlineFood_delivery/menus"
+            )
+            menu.menu_image = upload.get('secure_url')
+            menu.save()
+        return menu;
+        # return super().create(validated_data)
+    def update(self, instance, validated_data):
+        menu_image_upload = validated_data.pop('menu_image_upload', None)
+        
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        
+        if menu_image_upload:
+            upload = cloudinary.uploader.upload(
+                menu_image_upload,
+                folder='aptech_python_onlineFood_delivery/menus'
+            )
+            instance.menu_image = upload.get('secure_url')
+        
+        instance.save()
+        return instance
 
     def validate(self, attrs):
         # nothing special here—restaurant is set to owner’s restaurant on create

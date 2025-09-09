@@ -60,7 +60,7 @@ class Profile(models.Model):
     display_name = models.CharField(max_length=100, blank=True)
     phone_number = models.CharField(max_length=30, blank=True)
     bio = models.TextField(blank=True)
-    profile_picture = models.ImageField(upload_to="profiles/", blank=True, null=True)
+    profile_picture = models.URLField(blank=True, null=True)
 
     def __str__(self):
         return self.display_name or self.user.email
