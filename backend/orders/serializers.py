@@ -24,9 +24,56 @@ class OrderSerializer(serializers.ModelSerializer):
         fields = ["id", "restaurant", "status", "total_amount", "created_at", "items"]
         read_only_fields = ["status", "total_amount", "created_at", "items"]
         
+class SingleOrderCreateSerializer(serializers.Serializer):
+    dish_id = serializers.UUIDField()
+    quantity = serializers.IntegerField(min_value=1, default=1)
+
+    def validate(self, data):
+        try:
+            dish = Dish.objects.get(id=data["dish_id"])
+        except Dish.DoesNotExist:
+            raise serializers.ValidationError("Dish not found.")
+
+        if not dish.is_available:
+            raise serializers.ValidationError("This dish is not available.")
+
+        data["dish"] = dish
+        return data
+
+    def create(self, validated_data):
+        user = self.context["request"].user
+        dish = validated_data["dish"]
+        quantity = validated_data["quantity"]
+
+        # Create order tied to the dish's restaurant
+        order = Order.objects.create(
+            customer=user,
+            restaurant=dish.restaurant
+        )
+
+        # Add the dish as an order item
+        OrderItem.objects.create(
+            order=order,
+            dish=dish,
+            quantity=quantity,
+            price=dish.price,  # snapshot price
+        )
+
+        # recalc total
+        order.recalc_total()
+
+        # Create transaction (pending until restaurant owner approves)
+        txn = Transaction.objects.create(
+            order=order,
+            user=user,
+            amount=order.total_amount,
+            reference=f"TXN-{order.id.hex[:8]}",
+        )
+
+        return order, txn
 
 class OrderCreateSerializer(serializers.Serializer):
-    restaurant_id = serializers.IntegerField()
+    restaurant_id = serializers.UUIDField()
     items = OrderItemCreateSerializer(many=True)
 
     def validate(self, data):
@@ -51,6 +98,15 @@ class OrderCreateSerializer(serializers.Serializer):
         order.recalc_total()
         return order
     
+    
+
+class AddToCartSerializer(serializers.Serializer):
+    dish_id = serializers.PrimaryKeyRelatedField(
+        queryset=Dish.objects.all(), source="dish"
+    )
+    quantity = serializers.IntegerField(min_value=1, default=1)
+
+
 
 class CartItemSerializer(serializers.ModelSerializer):
     dish_name = serializers.CharField(source="dish.name", read_only=True)

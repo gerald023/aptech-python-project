@@ -7,11 +7,25 @@ from django.shortcuts import get_object_or_404
 from rest_framework.decorators import action
 from restaurants.models import Dish
 from rest_framework.response import Response
-from .serializers import OrderSerializer, OrderCreateSerializer, CartSerializer, TransactionSerializer
+from .serializers import OrderSerializer, OrderCreateSerializer, CartSerializer, TransactionSerializer, AddToCartSerializer, SingleOrderCreateSerializer
 
 class OrderCreateView(generics.CreateAPIView):
     serializer_class = OrderCreateSerializer
     permission_classes = [permissions.IsAuthenticated, IsCustomer]
+
+class SingleOrderCreateView(generics.CreateAPIView):
+    serializer_class = SingleOrderCreateSerializer
+    permission_classes = [permissions.IsAuthenticated, IsCustomer]
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data, context={"request": request})
+        serializer.is_valid(raise_exception=True)
+        order, txn = serializer.save()
+
+        return Response({
+            "order": OrderSerializer(order).data,
+            "transaction": TransactionSerializer(txn).data
+        }, status=status.HTTP_201_CREATED)
 
 class MyOrdersView(generics.ListAPIView):
     serializer_class = OrderSerializer
@@ -39,6 +53,9 @@ class RestaurantOrdersView(generics.ListAPIView):
 class CartViewSet(viewsets.ViewSet):
     permission_classes = [IsAuthenticated]
 
+    def get_queryset(self):
+        return Cart.objects.filter(user=self.request.user)
+    
     def get_cart(self, user):
         cart, _ = Cart.objects.get_or_create(user=user)
         return cart
@@ -48,24 +65,30 @@ class CartViewSet(viewsets.ViewSet):
         cart = self.get_cart(request.user)
         return Response(CartSerializer(cart).data)
 
-    @action(detail=False, methods=["post"])
+    @action(detail=False, methods=["post"], url_path="add-item")
     def add_item(self, request):
-        """Add a dish to cart (increase if already exists)"""
-        dish_id = request.data.get("dish_id")
-        qty = int(request.data.get("quantity", 1))
-        dish = get_object_or_404(Dish, id=dish_id)
+        serializer = AddToCartSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
 
-        cart = self.get_cart(request.user)
-        cart_item, created = CartItem.objects.get_or_create(
-            cart=cart, dish=dish, defaults={"price": dish.price, "quantity": qty}
-        )
+        dish = serializer.validated_data["dish"]
+        qty = serializer.validated_data["quantity"]
+
+        cart, _ = Cart.objects.get_or_create(user=request.user)
+        cart_item, created = CartItem.objects.get_or_create(cart=cart, dish=dish, defaults={"quantity": qty, "price": dish.price})
 
         if not created:
             cart_item.quantity += qty
             cart_item.save()
 
-        return Response(CartSerializer(cart).data, status=status.HTTP_201_CREATED)
-
+        return Response(
+            {
+                "message": "Item added to cart",
+                "dish": dish.name,
+                "quantity": cart_item.quantity,
+                "subtotal": cart_item.subtotal,
+            },
+            status=status.HTTP_200_OK,
+        )
     @action(detail=False, methods=["post"])
     def decrease_item(self, request):
         """Decrease a dish quantity (remove if 0)"""
@@ -120,3 +143,4 @@ class CartViewSet(viewsets.ViewSet):
             "order": OrderSerializer(order).data,
             "transaction": TransactionSerializer(txn).data
         }, status=status.HTTP_201_CREATED)
+        
