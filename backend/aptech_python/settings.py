@@ -67,6 +67,7 @@ CSRF_TRUSTED_ORIGINS = [
     'https://aptech-python-project.onrender.com',
     "https://online-food-ordering-system-if6f.vercel.app",
 ]
+CORS_ALLOW_CREDENTIALS = True
 # Application definition
 
 INSTALLED_APPS = [
